@@ -46,16 +46,42 @@ pipeline {
 
         // Las siguientes etapas (Deploy y Health Check) las agregaremos después
         stage('Deploy') {
-            steps {
-                echo 'Deploy stage - to be implemented'
-            }
+    steps {
+        script {
+            // Detener y eliminar contenedor anterior si existe
+            sh "docker rm -f calculadora-app || true"
+            
+            // Desplegar nuevo contenedor
+            sh """
+                docker run -d \
+                    --name calculadora-app \
+                    -p 8081:8080 \
+                    ${REPO}:${BUILD_NUMBER}
+            """
+            
+            // Verificar que el contenedor está corriendo
+            sh "docker ps | grep calculadora-app"
         }
+    }
+}
 
         stage('Health Check') {
-            steps {
-                echo 'Health Check stage - to be implemented'
-            }
+    steps {
+        script {
+            // Esperar que la aplicación inicie
+            sh "sleep 5"
+            
+            // Verificar el endpoint /salud
+            sh """
+                curl -f http://localhost:8081/salud || \
+                curl -f http://host.docker.internal:8081/salud
+            """
+            
+            // Mostrar logs del contenedor para verificar
+            sh "docker logs calculadora-app"
         }
+    }
+}
     }
 
     post {
