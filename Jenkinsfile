@@ -4,7 +4,7 @@ pipeline {
     environment {
         REPO = 'calculadora-ci'
         // Usamos host.docker.internal para que Jenkins pueda acceder al Docker del host
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
+        DOCKER_HOST = 'unix:///var/run/docker.sock'
     }
 
     stages {
